@@ -13,6 +13,7 @@ namespace resource.tool
     {
         private static uint s_Events = 0;
         private static bool s_IsLoaded = false;
+        private static bool s_IsTerminated = false;
         private static List<string> s_Files = new List<string>();
 
         private static string s_PreviewHtml =
@@ -68,7 +69,12 @@ namespace resource.tool
 
             public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)
             {
-                __UpdateProjects(s_Files, 0);
+                {
+                    s_IsTerminated = false;
+                }
+                {
+                    __UpdateProjects(s_Files, 0);
+                }
                 return VSConstants.S_OK;
             }
 
@@ -84,10 +90,16 @@ namespace resource.tool
 
             public int OnAfterCloseSolution(object pUnkReserved)
             {
-                atom.Trace.GetInstance().
-                    SetCommand(NAME.COMMAND.MESSAGE_REMOVE, "TinyPNG").
-                    Send(NAME.SOURCE.REFACTORING, NAME.EVENT.INFO, 0);
-                s_IsLoaded = false;
+                {
+                    s_IsLoaded = false;
+                    s_IsTerminated = true;
+                }
+                {
+                    atom.Trace.GetInstance().
+                        SetCommand(NAME.COMMAND.MESSAGE_REMOVE).
+                        SetCommand(NAME.COMMAND.MESSAGE_REMOVE, "urn:tinypng:id:ROOT").
+                        Send(NAME.SOURCE.REFACTORING, NAME.EVENT.INFO, 0);
+                }
                 return VSConstants.S_OK;
             }
         }
@@ -125,7 +137,7 @@ namespace resource.tool
         public static void __UpdateProjects(List<string> files, int deep)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            if ((s_Events != 0) && (s_IsLoaded == false))
+            if ((s_Events != 0) && (s_IsLoaded == false) && (s_IsTerminated == false))
             {
                 try
                 {
@@ -153,7 +165,7 @@ namespace resource.tool
                         {
                             var a_Context2 = new IVsHierarchy[1];
                             var a_Count = (uint)0;
-                            while ((a_Context1.Next(1, a_Context2, out a_Count) == VSConstants.S_OK) && (a_Count == 1))
+                            while ((s_IsTerminated == false) && (a_Context1.Next(1, a_Context2, out a_Count) == VSConstants.S_OK) && (a_Count == 1))
                             {
                                 TinyPNG.Instance.JoinableTaskFactory.RunAsync(async () =>
                                 {
@@ -200,7 +212,7 @@ namespace resource.tool
 
         public static async System.Threading.Tasks.Task __UpdateFilesAsync(IVsHierarchy hierarchy, uint itemId, List<string> files)
         {
-            if ((hierarchy != null) && (itemId != VSConstants.VSITEMID_NIL))
+            if ((s_IsTerminated == false) && (hierarchy != null) && (itemId != VSConstants.VSITEMID_NIL))
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(TinyPNG.Instance.DisposalToken);
                 var a_Context = __GetItemValue(hierarchy, itemId, (int)__VSHPROPID.VSHPROPID_HasEnumerationSideEffects);
@@ -209,13 +221,13 @@ namespace resource.tool
                     return;
                 }
             }
-            if ((hierarchy != null) && (itemId != VSConstants.VSITEMID_NIL))
+            if ((s_IsTerminated == false) && (hierarchy != null) && (itemId != VSConstants.VSITEMID_NIL))
             {
                 {
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(TinyPNG.Instance.DisposalToken);
                     itemId = __GetItemId(__GetItemValue(hierarchy, itemId, (int)__VSHPROPID.VSHPROPID_FirstChild));
                 }
-                while (itemId != VSConstants.VSITEMID_NIL)
+                while ((s_IsTerminated == false) && (itemId != VSConstants.VSITEMID_NIL))
                 {
                     var a_Context = (object)null;
                     var a_Name = string.Empty;
@@ -245,7 +257,7 @@ namespace resource.tool
         private static void __RemoveCaption(atom.Trace context)
         {
             context.
-                SetCommand(NAME.COMMAND.MESSAGE_REMOVE, "urn:tinypng:root:").
+                SetCommand(NAME.COMMAND.MESSAGE_REMOVE, "urn:tinypng:id:ROOT").
                 Send(NAME.SOURCE.REFACTORING, NAME.EVENT.WARNING, 0);
         }
 
@@ -255,8 +267,8 @@ namespace resource.tool
                 SetFontState(NAME.FONT_STATE.BLINK).
                 SetCommand(NAME.COMMAND.MESSAGE_EXPAND).
                 SetCommand(NAME.COMMAND.MESSAGE_SHOW).
-                SetCommand(NAME.COMMAND.MESSAGE_CLEAR, "urn:tinypng:root:").
-                SetCommand(NAME.COMMAND.MESSAGE_RESEND, "urn:tinypng:root:").
+                SetCommand(NAME.COMMAND.MESSAGE_CLEAR, "urn:tinypng:id:ROOT").
+                SetCommand(NAME.COMMAND.MESSAGE_RESEND, "urn:tinypng:id:ROOT").
                 SetCommand(NAME.COMMAND.MESSAGE_PIN).
                 SetControl(NAME.CONTROL.BROWSER).
                 SetValue(s_PreviewHtml).
@@ -270,7 +282,22 @@ namespace resource.tool
                 }
             }
             {
-                context.Send(NAME.SOURCE.REFACTORING, NAME.EVENT.PREVIEW, 1);
+                context.
+                    SetCommand(NAME.COMMAND.MESSAGE_UPDATE, "urn:tinypng:button:OPTIMIZE").
+                    SetControl(NAME.CONTROL.BROWSER).
+                    Send(NAME.SOURCE.REFACTORING, NAME.EVENT.PREVIEW, 1, "", s_PreviewHtml);
+                {
+                    context.
+                        SetControl(NAME.CONTROL.BUTTON, "[[[Run optimization of all not optimized files]]]").
+                        SetCount(10).
+                        SetForeground(NAME.COLOR.DARK_GRAY).
+                        SetBackground(NAME.COLOR.LIGHT_GRAY).
+                        SetAlignment(NAME.ALIGNMENT.RIGHT + " " + NAME.ALIGNMENT.BOTTOM).
+                        //SetControlPosition(0, 0).
+                        //SetControlSize(200, 40).
+                        SetUrlPipe("urn:tinypng:pipe:DEFAULT").
+                        Send(NAME.SOURCE.REFACTORING, NAME.EVENT.PREVIEW, 2, "[[[OPTIMIZE ALL]]]");
+                }
                 context.Send(NAME.SOURCE.REFACTORING, NAME.EVENT.PREVIEW, 1);
                 context.Send(NAME.SOURCE.REFACTORING, NAME.EVENT.PREVIEW, 1);
                 context.Send(NAME.SOURCE.REFACTORING, NAME.EVENT.PREVIEW, 1);
@@ -292,28 +319,29 @@ namespace resource.tool
             {
                 context.
                     SetCommand(NAME.COMMAND.MESSAGE_UPDATE, "urn:tinypng:all:").
-                    SetComment("[[[Found]]]: 73", "[[[Number of found not optimized pictures]]]").
+                    SetComment("[[[Found]]]: " + files.Count, "[[[Number of found not optimized pictures]]]").
                     Send(NAME.SOURCE.REFACTORING, NAME.EVENT.FOOTER, 1, "[[[Found pictures]]]");
             }
             foreach (var a_Context in files)
             {
                 var a_Context1 = Path.GetDirectoryName(a_Context);
-                var a_Index = a_Context1.ToLower().IndexOf(folder);
+                var a_Name1 = a_Context1;
+                var a_Index = a_Context.ToLower().IndexOf(folder);
                 if (a_Index == 0)
                 {
-                    a_Context1 = a_Context1.Substring(folder.Length, a_Context1.Length - folder.Length);
+                    a_Name1 = a_Name1.Substring(folder.Length, a_Name1.Length - folder.Length);
                 }
-                if (a_Context1.Length > 0)
+                if (a_Name1.Length > 0)
                 {
-                    if (a_Name != a_Context1)
+                    if (a_Name != a_Name1)
                     {
                         {
-                            a_Name = a_Context1;
+                            a_Name = a_Name1;
                         }
                         {
                             context.
-                                SetCommand(NAME.COMMAND.MESSAGE_UPDATE, "urn:tinypng:folder:" + a_Context1).
-                                SetComment("[[[Found]]]: 10", "[[[Number of found not optimized pictures]]]").
+                                SetCommand(NAME.COMMAND.MESSAGE_UPDATE, "urn:tinypng:folder:" + a_Name1).
+                                SetComment("[[[Found]]]: " + __GetCount(files, a_Context1), "[[[Number of found not optimized pictures]]]").
                                 SetUrlInfo(Path.GetDirectoryName(a_Context), "[[[Open folder]]]").
                                 Send(NAME.SOURCE.REFACTORING, NAME.EVENT.FOLDER, 2, a_Name);
                         }
@@ -335,15 +363,31 @@ namespace resource.tool
             }
         }
 
-        public static object __GetProperty(IVsHierarchy context, int propId)
+        public static int __GetCount(List<string> files, string folder)
         {
-            object a_Result;
-            if (context.GetProperty((uint)VSConstants.VSITEMID.Root, propId, out a_Result) == VSConstants.S_OK)
+            var a_Result = 0;
             {
-                return a_Result;
+                folder = folder.ToLower();
             }
-            return null;
+            foreach (var a_Context in files)
+            {
+                if (a_Context.ToLower().IndexOf(folder) == 0)
+                {
+                    a_Result++;
+                }
+            }
+            return a_Result;
         }
+
+        //public static object __GetProperty(IVsHierarchy context, int propId)
+        //{
+        //    object a_Result;
+        //    if (context.GetProperty((uint)VSConstants.VSITEMID.Root, propId, out a_Result) == VSConstants.S_OK)
+        //    {
+        //        return a_Result;
+        //    }
+        //    return null;
+        //}
 
         public static bool __IsItemEnabled(string context)
         {
