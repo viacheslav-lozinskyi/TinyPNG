@@ -25,6 +25,7 @@ namespace resource.package
             public const string GUID = "68C2787B-4F41-4145-BD12-17BEC8832539";
             public const string NAME = "TinyPNG";
             public const string VERSION = "1.0.1";
+            public const string PIPE = "urn:metaoutput:pipe:TinyPNG";
         }
 
         internal static AsyncPackage Instance { get; private set; }
@@ -33,6 +34,8 @@ namespace resource.package
         {
             {
                 Instance = this;
+                extension.AnyPipe.Connect();
+                extension.AnyPipe.Register(CONSTANT.PIPE, new pipe.VSPipe());
             }
             {
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -79,6 +82,7 @@ namespace resource.package
         {
             {
                 tool.VSTool.Disconnect();
+                extension.AnyPipe.Disconnect();
                 canClose = true;
             }
             return VSConstants.S_OK;

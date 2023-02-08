@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="resource\package\VSPackage.cs" />
+    <Compile Include="resource\pipe\VSPipe.cs" />
     <Compile Include="resource\tool\VSTool.cs" />
   </ItemGroup>
   <ItemGroup>
