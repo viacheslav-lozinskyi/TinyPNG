@@ -12,7 +12,7 @@ namespace resource.tool
     internal class VSTool
     {
         private static uint s_Events = 0;
-        private static bool s_IsLoaded = false;
+        private static bool s_IsVerified = false;
         private static bool s_IsTerminated = false;
         private static List<string> s_Files = new List<string>();
 
@@ -72,7 +72,7 @@ namespace resource.tool
             public int OnAfterCloseSolution(object pUnkReserved)
             {
                 {
-                    s_IsLoaded = false;
+                    s_IsVerified = false;
                     s_IsTerminated = true;
                 }
                 {
@@ -115,7 +115,7 @@ namespace resource.tool
         public static void __UpdateProjects(List<string> files, int deep)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            if ((s_Events != 0) && (s_IsLoaded == false) && (s_IsTerminated == false))
+            if ((s_Events != 0) && (s_IsVerified == false) && (s_IsTerminated == false))
             {
                 try
                 {
@@ -160,7 +160,7 @@ namespace resource.tool
                                         }
                                         else
                                         {
-                                            s_IsLoaded = true;
+                                            s_IsVerified = true;
                                         }
                                         if (files.Count > 0)
                                         {
@@ -324,14 +324,18 @@ namespace resource.tool
                 context.
                     SetCommand(NAME.COMMAND.MESSAGE_UPDATE, "urn:tinypng:all:").
                     SetComment("[[[Found]]]: " + files.Count, "[[[Number of found not optimized pictures]]]").
-                    Send(NAME.SOURCE.REFACTORING, NAME.EVENT.FOOTER, 1, "[[[Found pictures]]]");
+                    Send(NAME.SOURCE.REFACTORING, NAME.EVENT.FOOTER, 1, "[[[Not optimized pictures]]]");
             }
             foreach (var a_Context in files)
             {
                 var a_Context1 = Path.GetDirectoryName(a_Context);
                 var a_Name1 = a_Context1;
                 var a_Index = a_Context.ToLower().IndexOf(folder);
-                if (a_Index == 0)
+                if (s_IsTerminated)
+                {
+                    return;
+                }
+                    if (a_Index == 0)
                 {
                     a_Name1 = a_Name1.Substring(folder.Length, a_Name1.Length - folder.Length);
                 }
@@ -339,16 +343,14 @@ namespace resource.tool
                 {
                     if (a_Name != a_Name1)
                     {
-                        {
-                            a_Name = a_Name1;
-                        }
-                        {
-                            context.
-                                SetCommand(NAME.COMMAND.MESSAGE_UPDATE, "urn:tinypng:folder:" + a_Name).
-                                SetComment("[[[Found]]]: " + __GetCount(files, a_Context1), "[[[Number of found not optimized pictures]]]").
-                                SetUrlInfo(Path.GetDirectoryName(a_Context), "[[[Open folder]]]").
-                                Send(NAME.SOURCE.REFACTORING, NAME.EVENT.FOLDER, 2, a_Name);
-                        }
+                        context.
+                            SetCommand(NAME.COMMAND.MESSAGE_UPDATE, "urn:tinypng:folder:" + a_Name1).
+                            SetComment("[[[Found]]]: " + __GetCount(files, a_Context1), "[[[Number of found not optimized pictures]]]").
+                            SetUrlInfo(Path.GetDirectoryName(a_Context), "[[[Open folder]]]").
+                            Send(NAME.SOURCE.REFACTORING, NAME.EVENT.FOLDER, 2, a_Name1);
+                    }
+                    {
+                        a_Name = a_Name1;
                     }
                     {
                         context.
@@ -423,9 +425,12 @@ namespace resource.tool
             return VSConstants.VSITEMID_NIL;
         }
 
-        public static void __ShowSettings()
+        public static void __ShowOptions()
         {
-            // VsShellUtilities.ShowToolsOptionsPage(); // TODO: implement property page
+            ThreadHelper.ThrowIfNotOnUIThread();
+            {
+                package.TinyPNG.Instance.ShowOptionPage(typeof(VSOptions));
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using EnvDTE80;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using resource.tool;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -15,6 +16,7 @@ namespace resource.package
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(CONSTANT.GUID)]
     [ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string, PackageAutoLoadFlags.BackgroundLoad)]
+    [ProvideOptionPage(typeof(VSOptions), CONSTANT.PRODUCT, CONSTANT.NAME, 0, 0, true)]
     public sealed class TinyPNG : AsyncPackage
     {
         internal static class CONSTANT
@@ -25,6 +27,7 @@ namespace resource.package
             public const string GUID = "68C2787B-4F41-4145-BD12-17BEC8832539";
             public const string NAME = "TinyPNG";
             public const string VERSION = "1.0.1";
+            public const string PRODUCT = "MetaOutput";
             public const string PIPE = "urn:metaoutput:pipe:TinyPNG";
         }
 
@@ -62,7 +65,7 @@ namespace resource.package
                         }
                         if (a_Context1 != null)
                         {
-                            a_Context1.OutputString("\r\n" + CONSTANT.NAME + " extension doesn't work without MetaOutput.\r\n    Please install it (https://www.metaoutput.net/download)\r\n");
+                            a_Context1.OutputString("\r\n" + CONSTANT.NAME + " extension doesn't work without MetaOutput.\r\n    Please install it --> https://www.metaoutput.net/download\r\n");
                             a_Context1.Activate();
                         }
                     }
