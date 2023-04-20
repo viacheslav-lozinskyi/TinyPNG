@@ -294,7 +294,7 @@ namespace resource.tool
                     context.
                         SetControl(NAME.CONTROL.LABEL).
                         SetAlignment(NAME.ALIGNMENT.TOP).
-                        SetBackground(NAME.COLOR.SILVER).
+                        SetBackground(NAME.COLOR.ROYAL_BLUE).
                         SetForeground(NAME.COLOR.BLACK).
                         SetFontSize(20).
                         SetFontState(NAME.FONT_STATE.BOLD).
@@ -320,6 +320,13 @@ namespace resource.tool
                         context.
                             SetControl(NAME.CONTROL.LABEL).
                             SetAlignment(NAME.ALIGNMENT.TOP).
+                            SetForeground(NAME.COLOR.RED).
+                            SetFontSize(16).
+                            SetMargin(0, CONSTANT.PADDING.DEFAULT * 2).
+                            Send(NAME.SOURCE.REFACTORING, NAME.EVENT.CONTROL, 3, "[[[Current solution contains unoptimized images]]]!");
+                        context.
+                            SetControl(NAME.CONTROL.LABEL).
+                            SetAlignment(NAME.ALIGNMENT.TOP).
                             SetForeground(NAME.COLOR.DARK_RED).
                             SetFontSize(16).
                             SetMargin(0, CONSTANT.PADDING.DEFAULT * 2).
@@ -332,6 +339,13 @@ namespace resource.tool
                             SetMargin(0, CONSTANT.PADDING.DEFAULT * 2).
                             Send(NAME.SOURCE.REFACTORING, NAME.EVENT.CONTROL, 3, "[[[List of found pictures are below]]].");
                         context.
+                            SetControl(NAME.CONTROL.PANEL).
+                            SetAlignment(NAME.ALIGNMENT.TOP).
+                            SetForeground(NAME.COLOR.SILVER).
+                            SetSize(0, 1).
+                            SetMargin(0, CONSTANT.PADDING.DEFAULT * 3).
+                            Send(NAME.SOURCE.REFACTORING, NAME.EVENT.CONTROL, 3);
+                        context.
                             SetControl(NAME.CONTROL.LABEL).
                             SetAlignment(NAME.ALIGNMENT.BOTTOM).
                             SetForeground(NAME.COLOR.GRAY).
@@ -343,6 +357,13 @@ namespace resource.tool
                             SetForeground(NAME.COLOR.GRAY).
                             SetFontSize(10).
                             Send(NAME.SOURCE.REFACTORING, NAME.EVENT.CONTROL, 3, "[[[Also, information about optimized pictures is stored there]]]:");
+                        context.
+                            SetControl(NAME.CONTROL.PANEL).
+                            SetAlignment(NAME.ALIGNMENT.BOTTOM).
+                            SetForeground(NAME.COLOR.SILVER).
+                            SetSize(0, 1).
+                            SetMargin(0, -CONSTANT.PADDING.DEFAULT * 3).
+                            Send(NAME.SOURCE.REFACTORING, NAME.EVENT.CONTROL, 3);
                     }
                 }
                 {
@@ -352,8 +373,8 @@ namespace resource.tool
                         SetControl(NAME.CONTROL.BUTTON, "[[[Run optimization of all not optimized files]]]").
                         SetAlignment(NAME.ALIGNMENT.RIGHT).
                         SetAlignment(NAME.ALIGNMENT.BOTTOM).
-                        SetForeground(NAME.COLOR.RED).
-                        SetBackground(NAME.COLOR.SILVER).
+                        SetForeground(NAME.COLOR.BLACK).
+                        SetBackground(NAME.COLOR.ROYAL_BLUE).
                         SetFontSize(16).
                         SetFontState(NAME.FONT_STATE.BOLD).
                         SetFontState(NAME.FONT_STATE.BLINK).
