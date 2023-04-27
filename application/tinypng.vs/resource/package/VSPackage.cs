@@ -22,7 +22,8 @@ namespace resource.package
         internal static class CONSTANT
         {
             public const string APPLICATION = "Visual Studio";
-            public const string COPYRIGHT = "Copyright (c) 2020-2023 by Viacheslav Lozinskyi. All rights reserved.";
+            public const string COMPANY = "Viacheslav Lozinskyi";
+            public const string COPYRIGHT = "Copyright (c) 2022-2023 by Viacheslav Lozinskyi. All rights reserved.";
             public const string DESCRIPTION = "Lossy optimization for any PNG, JPEG, APNG, and WEBP images by TinyPNG service.";
             public const string GUID = "68C2787B-4F41-4145-BD12-17BEC8832539";
             public const string NAME = "TinyPNG";
