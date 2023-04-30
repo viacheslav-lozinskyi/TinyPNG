@@ -16,7 +16,7 @@ namespace resource.package
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(CONSTANT.GUID)]
     [ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string, PackageAutoLoadFlags.BackgroundLoad)]
-    [ProvideOptionPage(typeof(VSOptions), CONSTANT.PRODUCT, CONSTANT.NAME, 0, 0, true)]
+    [ProvideOptionPage(typeof(VSOptions), CONSTANT.HOST, CONSTANT.NAME, 0, 0, true)]
     public sealed class TinyPNG : AsyncPackage
     {
         internal static class CONSTANT
@@ -26,9 +26,9 @@ namespace resource.package
             public const string COPYRIGHT = "Copyright (c) 2022-2023 by Viacheslav Lozinskyi. All rights reserved.";
             public const string DESCRIPTION = "Lossy optimization for any PNG, JPEG, APNG, and WEBP images by TinyPNG service.";
             public const string GUID = "68C2787B-4F41-4145-BD12-17BEC8832539";
+            public const string HOST = "MetaOutput";
             public const string NAME = "TinyPNG";
             public const string VERSION = "1.0.1";
-            public const string PRODUCT = "MetaOutput";
             public const string PIPE = "urn:metaoutput:pipe:TinyPNG";
         }
 
@@ -54,7 +54,7 @@ namespace resource.package
                         var a_Context1 = (OutputWindowPane)null;
                         for (var i = a_Context.ToolWindows.OutputWindow.OutputWindowPanes.Count; i >= 1; i--)
                         {
-                            if (a_Context.ToolWindows.OutputWindow.OutputWindowPanes.Item(i).Name == "MetaOutput")
+                            if (a_Context.ToolWindows.OutputWindow.OutputWindowPanes.Item(i).Name == CONSTANT.HOST)
                             {
                                 a_Context1 = a_Context.ToolWindows.OutputWindow.OutputWindowPanes.Item(i);
                                 break;
@@ -62,7 +62,7 @@ namespace resource.package
                         }
                         if (a_Context1 == null)
                         {
-                            a_Context1 = a_Context.ToolWindows.OutputWindow.OutputWindowPanes.Add("MetaOutput");
+                            a_Context1 = a_Context.ToolWindows.OutputWindow.OutputWindowPanes.Add(CONSTANT.HOST);
                         }
                         if (a_Context1 != null)
                         {
