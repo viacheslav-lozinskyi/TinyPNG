@@ -28,7 +28,7 @@ namespace resource.package
             public const string GUID = "68C2787B-4F41-4145-BD12-17BEC8832539";
             public const string HOST = "MetaOutput";
             public const string NAME = "TinyPNG";
-            public const string VERSION = "1.0.1";
+            public const string VERSION = "1.1.0";
             public const string PIPE = "urn:metaoutput:pipe:TinyPNG";
         }
 
