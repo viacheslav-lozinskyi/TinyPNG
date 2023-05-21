@@ -14,7 +14,7 @@ namespace resource.tool
 
         public static string GetAPIKey()
         {
-            return Environment.GetEnvironmentVariable("TinyPNG_APIKEY", EnvironmentVariableTarget.User);
+            return Environment.GetEnvironmentVariable("TINYPNG_APIKEY", EnvironmentVariableTarget.User);
         }
 
         protected override IWin32Window Window
