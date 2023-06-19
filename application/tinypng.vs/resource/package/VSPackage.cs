@@ -36,11 +36,8 @@ namespace resource.package
                 Instance = this;
             }
             {
-                extension.AnyPipe.Connect();
-                //extension.AnyPipe.Connect(CONSTANT.APPLICATION, CONSTANT.NAME);
+                extension.AnyPipe.Connect(CONSTANT.APPLICATION, CONSTANT.NAME);
                 extension.AnyPipe.Register(CONSTANT.PIPE, new pipe.VSPipe());
-            }
-            {
                 await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             }
             try
